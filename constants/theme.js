@@ -66,7 +66,6 @@ export const SIZES = {
     margin: baseUnit * 2,
     marginMedium: baseUnit * 2.5, // Ayarlandı
     marginLarge: baseUnit * 3.5, // Ayarlandı
-    actions: '#000000',
     // Font Boyutları (baseUnit * 2 * fontScaleFactor gibi düşünülebilir)
     h1: baseUnit * 4 * 1.0,
     h2: baseUnit * 3.5 * 1.0,

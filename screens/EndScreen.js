@@ -11,13 +11,12 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import ConfettiCannon from 'react-native-confetti-cannon';
-import { MotiView } from 'moti';
+import { MotiView, AnimatePresence } from 'moti';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 
 import { useGame } from '../context/useGame';
 import ActionButton from '../components/ActionButton';
-import Card from '../components/Card';
 import { COLORS, SIZES } from '../constants/theme';
 
 /**
@@ -32,14 +31,7 @@ const EndScreen = ({ navigation }) => {
     gamePhase,
     selectedPlayerForTask,
     targetScore = 20,
-    blackDeck = [],
   } = gameState;
-
-  // Siyah kart seçim state'leri
-  const [isSelectingCard, setIsSelectingCard] = useState(false);
-  const [selectedCardIndex, setSelectedCardIndex] = useState(null);
-  const [revealedCard, setRevealedCard] = useState(null);
-  const [isRevealing, setIsRevealing] = useState(false);
 
   /* winner / loser / sorted list */
   const { winner, loser, sortedPlayers } = useMemo(() => {
@@ -54,7 +46,7 @@ const EndScreen = ({ navigation }) => {
 
     return { winner: winnerPlayer, loser: loserPlayer, sortedPlayers: sorted };
   }, [players, selectedPlayerForTask]);
-
+  
   /* ────── EFFECTS ────── */
   const confettiRef = useRef(null);
 
@@ -85,36 +77,19 @@ const EndScreen = ({ navigation }) => {
     navigation.replace('Game');
   }, [actions, navigation]);
 
-  const handleDrawBlackCard = useCallback(() => {
-    setIsSelectingCard(true);
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-  }, []);
 
-  const handleCardSelect = useCallback((cardIndex) => {
-    setSelectedCardIndex(cardIndex);
-    setIsRevealing(true);
+  const handleDrawBlackCard = useCallback(() => {
+    // Simple haptic feedback
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
     
-    // Seçilen kartı blackDeck'ten al
-    const selectedCard = blackDeck[cardIndex];
-    
-    setTimeout(() => {
-      setRevealedCard(selectedCard);
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-      
-      setTimeout(() => {
-        actions.assignAndFinishBlackCard();
-        setIsSelectingCard(false);
-        setSelectedCardIndex(null);
-        setRevealedCard(null);
-        setIsRevealing(false);
-      }, 3000); // 3 saniye kartı göster
-    }, 1000); // 1 saniye bekleme
-  }, [blackDeck, actions]);
+    // Immediate assignment without animations
+    actions.assignAndFinishBlackCard();
+  }, [actions]);
 
   const handleShareResults = useCallback(async () => {
     try {
       let msg = 'Kart Oyunu Sonuçları\n\n';
-      if (winner) msg += `🏆 Kazanan: ${winner.avatarId} ${winner.name} (${winner.score} Puan)\n`;
+      if (winner) msg += ` Kazanan: ${winner.avatarId} ${winner.name} (${winner.score} Puan)\n`;
       msg += `🎯 Hedef Puan: ${targetScore}\n`;
       if (loser) msg += `⚫️ Siyah Kart: ${loser.avatarId} ${loser.name}\n`;
       msg += '\nSkor Tablosu:\n';
@@ -156,7 +131,10 @@ const EndScreen = ({ navigation }) => {
 
   /* ────── UI ────── */
   return (
-    <LinearGradient colors={COLORS.backgroundGradient} style={styles.flexFill}>
+    <LinearGradient 
+      colors={['#1a0000', '#330000', '#1a1a1a']} 
+      style={styles.flexFill}
+    >
       <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
 
         {/* Confetti */}
@@ -168,7 +146,7 @@ const EndScreen = ({ navigation }) => {
           origin={{ x: -10, y: 0 }}
           explosionSpeed={420}
           fallSpeed={2900}
-          colors={[COLORS.accent, COLORS.positive, COLORS.warning, COLORS.white]}
+          colors={['#8B0000', '#FF4500', '#DC143C', '#B22222']}
         />
 
         <ScrollView
@@ -176,26 +154,36 @@ const EndScreen = ({ navigation }) => {
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
         >
-          {/* Header & winner */}
-          <MotiView
-            from={{ opacity: 0, scale: 0.7, translateY: -40 }}
-            animate={{ opacity: 1, scale: 1, translateY: 0 }}
-            transition={{ type: 'spring', stiffness: 160, damping: 16 }}
-            style={styles.header}
-          >
-            <Text style={styles.title}>Oyun Bitti!</Text>
+          {/* Ultra Scary Header */}
+          <View style={styles.horrorHeader}>
+            <Text style={styles.horrorTitle}>KADER GÜNÜ </Text>
+            
             <View
-              style={[styles.winnerContainer, !winner && styles.noWinnerContainer]}
+              style={[styles.horrorWinnerContainer, !winner && styles.noWinnerContainer]}
               accessibilityLiveRegion="polite"
             >
-              <Text style={[styles.winnerText, !winner && styles.noWinnerText]}>
-                {winner
-                  ? `🏆 Kazanan: ${winner.avatarId} ${winner.name} (${winner.score} Puan)`
-                  : 'Kazanan Belirlenemedi'}
+              {winner ? (
+                <>
+                  <Text style={styles.winnerAnnouncement}>
+                    KAZANAN
+                  </Text>
+                  <Text style={styles.horrorWinnerText}>
+                     {winner.avatarId} {winner.name}
+                  </Text>
+                  <Text style={styles.scoreDisplay}>
+                    {winner.score} PUAN
+                  </Text>
+                </>
+              ) : (
+                <Text style={styles.noWinnerText}>
+                  🌑 KARARTMA - GALİP BELİRSİZ 🌑
+                </Text>
+              )}
+              <Text style={styles.horrorTargetText}>
+                 Hedef Puan: {targetScore} 
               </Text>
-              <Text style={styles.targetScoreText}>🎯 Hedef Puan: {targetScore}</Text>
             </View>
-          </MotiView>
+          </View>
 
           {/* Scores */}
           <MotiView
@@ -204,7 +192,7 @@ const EndScreen = ({ navigation }) => {
             transition={{ type: 'timing', duration: 400, delay: 250 }}
             style={styles.scoresContainer}
           >
-            <Text style={styles.scoresTitle}>📊 Final Skorları</Text>
+            <Text style={styles.horrorScoresTitle}>Oyuncu Skorları</Text>
             <FlatList
               data={sortedPlayers}
               keyExtractor={item => String(item.id)}
@@ -215,152 +203,71 @@ const EndScreen = ({ navigation }) => {
             />
           </MotiView>
 
-          {/* Black card */}
-          <MotiView
-            from={{ opacity: 0, translateY: 30, scale: 0.8 }}
-            animate={{ 
-              opacity: 1, 
-              translateY: 0, 
-              scale: 1,
-            }}
-            transition={{ 
-              type: 'timing', 
-              duration: 600, 
-              delay: 400 
-            }}
-            style={styles.blackCardContainer}
-          >
-            <MotiView
-              from={{ rotate: '0deg' }}
-              animate={{ rotate: '360deg' }}
-              transition={{
-                type: 'timing',
-                duration: 2000,
-                repeat: Infinity,
-                repeatReverse: false,
-              }}
-            >
+          {/* Ultra Scary Black Card Section */}
+          <View style={styles.horrorCardContainer}>
+            {/* Static Horror Icons */}
+            <View style={styles.horrorIconContainer}>
               <Ionicons
                 name="skull"
-                size={SIZES.iconSizeLarge * 1.5}
-                color="#FF0000"
-                style={styles.blackCardIcon}
+                size={SIZES.iconSizeLarge * 1.8}
+                color="#8B0000"
+                style={styles.primarySkull}
               />
-            </MotiView>
-            <MotiView
-              from={{ opacity: 0.3 }}
-              animate={{ opacity: 1 }}
-              transition={{
-                type: 'timing',
-                duration: 1000,
-                repeat: Infinity,
-                repeatReverse: true,
-              }}
-            >
-              <Text style={styles.messageText}>{endScreenMessage || ' '}</Text>
-            </MotiView>
-            {gamePhase === 'assigningBlackCard' && loser && !isSelectingCard && (
-              <MotiView
-                from={{ scale: 0.9 }}
-                animate={{ scale: 1.05 }}
-                transition={{
-                  type: 'timing',
-                  duration: 800,
-                  repeat: Infinity,
-                  repeatReverse: true,
-                }}
-              >
+              <Ionicons
+                name="flame"
+                size={SIZES.iconSizeLarge * 0.8}
+                color="#FF4500"
+                style={styles.leftFlame}
+              />
+              <Ionicons
+                name="flame"
+                size={SIZES.iconSizeLarge * 0.8}
+                color="#FF4500"
+                style={styles.rightFlame}
+              />
+            </View>
+
+            {/* Dramatic Card Drawing Area */}
+            {gamePhase === 'assigningBlackCard' && loser && (
+              <View style={styles.doomContainer}>
+                <Text style={styles.doomTitle}>🔥 KADER ÇARKI 🔥</Text>
+                <Text style={styles.victimText}>
+                  {loser.avatarId} {loser.name}
+                </Text>
+                <Text style={styles.doomSubtext}>
+                  Kaderin karşısında çaresizsin...
+                </Text>
+                
+                <View style={styles.wheelOfDoom}>
+                  <Text style={styles.wheelText}>💀</Text>
+                </View>
+
                 <ActionButton
-                  title={`${loser.name}, Kaderin Karanlık Yüzüyle Karşılaş!`}
+                  title="KADERE TESLIM OL!"
                   onPress={handleDrawBlackCard}
                   type="danger"
                   iconLeft="skull"
-                  style={styles.blackCardButton}
+                  style={styles.doomButton}
                 />
-              </MotiView>
+              </View>
             )}
 
-            {/* Siyah Kart Seçim UI */}
-            {isSelectingCard && (
-              <MotiView
-                from={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ type: 'timing', duration: 600 }}
-                style={styles.cardSelectionContainer}
-              >
-                <Text style={styles.selectionTitle}>
-                  🔮 KADERİNİ SEÇ! 🔮
-                </Text>
-                <Text style={styles.selectionSubtitle}>
-                  Birini seç... ama seçiminin sonuçlarına hazır ol!
-                </Text>
-                
-                <View style={styles.cardsRow}>
-                  {[0, 1, 2, 3, 4].map((index) => (
-                    <MotiView
-                      key={index}
-                      from={{ opacity: 0, translateY: 50, rotateY: '90deg' }}
-                      animate={{ opacity: 1, translateY: 0, rotateY: '0deg' }}
-                      transition={{ 
-                        type: 'timing', 
-                        duration: 800, 
-                        delay: index * 200 
-                      }}
-                      style={styles.cardWrapper}
-                    >
-                      {selectedCardIndex === index && revealedCard ? (
-                        <Card
-                          type="siyah"
-                          text={revealedCard.text}
-                          isVisible={true}
-                          style={styles.revealedCard}
-                        />
-                      ) : (
-                        <Card
-                          type="kapalı"
-                          isVisible={true}
-                          faceDownContextType="red"
-                          onPress={() => !isRevealing && handleCardSelect(index)}
-                          style={[
-                            styles.hiddenCard,
-                            selectedCardIndex === index && styles.selectedCard
-                          ]}
-                        />
-                      )}
-                    </MotiView>
-                  ))}
-                </View>
 
-                {isRevealing && !revealedCard && (
-                  <MotiView
-                    from={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ type: 'timing', duration: 500 }}
-                  >
-                    <Text style={styles.revealingText}>
-                      ⚡ KADERİN AÇILIYOR... ⚡
-                    </Text>
-                  </MotiView>
-                )}
-
-                {revealedCard && (
-                  <MotiView
-                    from={{ opacity: 0, scale: 0.5 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ type: 'timing', duration: 800 }}
-                    style={styles.revealedCardText}
-                  >
-                    <Text style={styles.fateText}>
-                      💀 SENİN KADERİN! 💀
-                    </Text>
-                    <Text style={styles.revealedTaskText}>
-                      {revealedCard.text}
-                    </Text>
-                  </MotiView>
-                )}
-              </MotiView>
+            {/* Final Message Display */}
+            {gamePhase === 'ended' && endScreenMessage && (
+              <View style={styles.finalMessageContainer}>
+                <Text style={styles.finalMessageTitle}>
+                  KADER BELİRLENDİ 
+                </Text>
+                <Text style={styles.finalMessageText}>
+                  {endScreenMessage}
+                </Text>
+                <Text style={styles.fearText}>
+                  Görev seni bekliyor...
+                </Text>
+              </View>
             )}
-          </MotiView>
+          </View>
 
           {/* Bottom actions (scrolls together) */}
           {gamePhase === 'ended' && (
@@ -411,34 +318,81 @@ const styles = StyleSheet.create({
     paddingBottom: SIZES.paddingLarge,
   },
 
-  /* Header */
-  header: { width: '100%', alignItems: 'center', marginBottom: SIZES.marginMedium },
-  title:  {
-    fontSize: SIZES.h1 * 1.2,
+  /* Horror Header */
+  horrorHeader: { 
+    width: '100%', 
+    alignItems: 'center', 
+    marginBottom: SIZES.marginMedium,
+    padding: SIZES.paddingMedium,
+  },
+  horrorTitle: {
+    fontSize: SIZES.h1 * 1.4,
     fontFamily: SIZES.bold,
-    color: COLORS.textPrimary,
+    color: '#FF4500',
     textAlign: 'center',
     marginBottom: SIZES.marginMedium,
+    textShadowColor: '#8B0000',
+    textShadowOffset: { width: 3, height: 3 },
+    textShadowRadius: 8,
   },
-  winnerContainer: {
-    paddingVertical: SIZES.padding * 0.8,
+  horrorWinnerContainer: {
+    paddingVertical: SIZES.padding * 1.2,
     paddingHorizontal: SIZES.paddingLarge,
     borderRadius: SIZES.buttonRadius * 1.5,
-    borderWidth: 1.5,
-    borderColor: COLORS.positiveLight,
-    backgroundColor: 'rgba(72,187,120,0.3)',
+    borderWidth: 3,
+    borderColor: '#FF4500',
+    backgroundColor: 'rgba(139,0,0,0.4)',
+    shadowColor: 'rgba(139,0,0,0.4)',
+    shadowOffset: { width: 0, height: 5 },
+    shadowOpacity: 0.8,
+    shadowRadius: 10,
+    elevation: 15,
   },
   noWinnerContainer: {
-    backgroundColor: 'rgba(113,128,150,0.25)',
+    backgroundColor: 'rgba(139,0,0,0.4)',
     borderColor: COLORS.textMuted,
   },
-  winnerText: {
-    fontSize: SIZES.title * 1.05,
+  winnerAnnouncement: {
+    fontSize: SIZES.h2,
     fontFamily: SIZES.bold,
-    color: COLORS.white,
+    color: '#FFD700',
+    textAlign: 'center',
+    marginBottom: SIZES.marginSmall,
+    textShadowColor: 'rgba(139,0,0,0.4)',
+    textShadowOffset: { width: 2, height: 2 },
+    textShadowRadius: 5,
+  },
+  horrorWinnerText: {
+    fontSize: SIZES.title * 1.3,
+    fontFamily: SIZES.bold,
+    color: '#FF4500',
+    textAlign: 'center',
+    marginBottom: SIZES.marginSmall,
+    textShadowColor: '#000',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 3,
+  },
+  scoreDisplay: {
+    fontSize: SIZES.body * 1.1,
+    fontFamily: SIZES.bold,
+    color: '#DC143C',
+    textAlign: 'center',
+    marginBottom: SIZES.marginSmall,
+  },
+  horrorTargetText: {
+    fontSize: SIZES.body,
+    fontFamily: SIZES.regular,
+    color: '#8B0000',
+    textAlign: 'center',
+    marginTop: SIZES.marginSmall,
+    fontStyle: 'italic',
+  },
+  noWinnerText: { 
+    color: COLORS.textSecondary,
+    fontSize: SIZES.title,
+    fontFamily: SIZES.bold,
     textAlign: 'center',
   },
-  noWinnerText: { color: COLORS.textSecondary },
 
   /* Scores */
   scoresContainer: {
@@ -452,12 +406,15 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.08)',
   },
-  scoresTitle: {
+  horrorScoresTitle: {
     fontSize: SIZES.h3,
     fontFamily: SIZES.bold,
-    color: COLORS.textSecondary,
+    color: '#FF4500',
     textAlign: 'center',
     marginBottom: SIZES.marginMedium,
+    textShadowColor: '#8B0000',
+    textShadowOffset: { width: 2, height: 2 },
+    textShadowRadius: 5,
   },
   scoresList: { paddingBottom: SIZES.padding },
   scoreRow: {
@@ -502,8 +459,8 @@ const styles = StyleSheet.create({
     color: COLORS.textPrimary,
   },
 
-  /* Black Card */
-  blackCardContainer: {
+  /* Ultra Horror Black Card Styles */
+  horrorCardContainer: {
     width: '95%',
     maxWidth: SIZES.contentMaxWidth,
     alignItems: 'center',
@@ -511,137 +468,192 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.85)',
     borderRadius: SIZES.cardRadius * 1.1,
     borderWidth: 3,
-    borderColor: '#FF0000',
+    borderColor: '#8B0000',
     marginBottom: SIZES.marginLarge,
-    shadowColor: '#FF0000',
-    shadowOffset: { width: 0, height: 0 },
+    shadowColor: '#8B0000',
+    shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.8,
-    shadowRadius: 20,
+    shadowRadius: 15,
     elevation: 20,
   },
-  blackCardIcon: { 
-    marginBottom: 12, 
-    opacity: 1,
-    shadowColor: '#FF0000',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 1,
-    shadowRadius: 10,
-  },
-  messageText: {
-    fontSize: SIZES.body * 1.1,
-    lineHeight: SIZES.body * 1.8,
-    textAlign: 'center',
-    color: '#FFAAAA',
-    marginBottom: SIZES.marginMedium,
-    fontFamily: SIZES.bold,
-    textShadowColor: '#FF0000',
-    textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 8,
-  },
-  blackCardButton: {
-    marginTop: SIZES.marginSmall,
-    width: '100%',
-    maxWidth: 320,
-    shadowColor: '#FF0000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.6,
-    shadowRadius: 12,
-  },
-
-  /* Siyah Kart Seçim UI */
-  cardSelectionContainer: {
-    width: '100%',
-    alignItems: 'center',
-    marginTop: SIZES.marginLarge,
-    padding: SIZES.paddingLarge,
-    backgroundColor: 'rgba(0,0,0,0.9)',
-    borderRadius: SIZES.cardRadius * 1.5,
-    borderWidth: 2,
+  bloodEffect: {
+    backgroundColor: 'rgba(139,0,0,0.3)',
     borderColor: '#FF0000',
     shadowColor: '#FF0000',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 1,
-    shadowRadius: 25,
   },
-  selectionTitle: {
+  horrorIconContainer: {
+    alignItems: 'center',
+    marginBottom: SIZES.marginMedium,
+    position: 'relative',
+  },
+  primarySkull: {
+    textShadowColor: '#000',
+    textShadowOffset: { width: 2, height: 2 },
+    textShadowRadius: 8,
+  },
+  leftFlame: {
+    position: 'absolute',
+    left: -40,
+    top: 10,
+  },
+  rightFlame: {
+    position: 'absolute',
+    right: -40,
+    top: 10,
+  },
+  doomContainer: {
+    alignItems: 'center',
+    width: '100%',
+  },
+  doomTitle: {
     fontSize: SIZES.h2,
     fontFamily: SIZES.bold,
-    color: '#FFD700',
+    color: '#FF4500',
     textAlign: 'center',
     marginBottom: SIZES.marginSmall,
-    textShadowColor: '#FF0000',
-    textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 10,
+    textShadowColor: '#000',
+    textShadowOffset: { width: 2, height: 2 },
+    textShadowRadius: 5,
   },
-  selectionSubtitle: {
+  victimText: {
+    fontSize: SIZES.title * 1.3,
+    fontFamily: SIZES.bold,
+    color: '#8B0000',
+    textAlign: 'center',
+    marginBottom: SIZES.marginSmall,
+    textShadowColor: '#FFF',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 3,
+  },
+  doomSubtext: {
     fontSize: SIZES.body,
-    color: '#FFAAAA',
+    fontFamily: SIZES.regular,
+    color: '#DC143C',
     textAlign: 'center',
     marginBottom: SIZES.marginLarge,
     fontStyle: 'italic',
   },
-  cardsRow: {
-    flexDirection: 'row',
-    justifyContent: 'center',
+  wheelOfDoom: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: 'rgba(139,0,0,0.8)',
+    borderWidth: 4,
+    borderColor: '#FF0000',
     alignItems: 'center',
-    flexWrap: 'wrap',
-    marginBottom: SIZES.marginMedium,
-  },
-  cardWrapper: {
-    margin: SIZES.marginSmall * 0.5,
-  },
-  hiddenCard: {
-    transform: [{ scale: 0.7 }],
-  },
-  selectedCard: {
-    transform: [{ scale: 0.8 }],
-    shadowColor: '#FFD700',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 1,
-    shadowRadius: 15,
-  },
-  revealedCard: {
-    transform: [{ scale: 0.8 }],
+    justifyContent: 'center',
+    marginBottom: SIZES.marginLarge,
     shadowColor: '#FF0000',
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 1,
-    shadowRadius: 20,
+    shadowRadius: 10,
+    elevation: 15,
   },
-  revealingText: {
-    fontSize: SIZES.h3,
-    fontFamily: SIZES.bold,
-    color: '#FFD700',
-    textAlign: 'center',
+  wheelText: {
+    fontSize: SIZES.h1,
+    textShadowColor: '#000',
+    textShadowOffset: { width: 2, height: 2 },
+    textShadowRadius: 5,
+  },
+  doomButton: {
     marginTop: SIZES.marginMedium,
-    textShadowColor: '#FF0000',
-    textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 8,
-  },
-  revealedCardText: {
-    alignItems: 'center',
-    marginTop: SIZES.marginLarge,
-    padding: SIZES.paddingMedium,
-    backgroundColor: 'rgba(255,0,0,0.2)',
-    borderRadius: SIZES.cardRadius,
-    borderWidth: 1,
+    width: '100%',
+    maxWidth: 320,
+    backgroundColor: '#8B0000',
+    borderWidth: 2,
     borderColor: '#FF0000',
   },
-  fateText: {
-    fontSize: SIZES.h2,
+  cardDrawingArea: {
+    alignItems: 'center',
+    width: '100%',
+  },
+  drawingText: {
+    fontSize: SIZES.h3,
     fontFamily: SIZES.bold,
-    color: '#FF0000',
+    color: '#FF4500',
+    textAlign: 'center',
+    marginBottom: SIZES.marginLarge,
+    textShadowColor: '#000',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 3,
+  },
+  cardsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 8,
+    maxWidth: 280,
+  },
+  fateCard: {
+    width: 35,
+    height: 50,
+    backgroundColor: '#2d2d2d',
+    borderRadius: 8,
+    borderWidth: 2,
+    borderColor: '#666',
+    alignItems: 'center',
+    justifyContent: 'center',
+    margin: 2,
+  },
+  revealedCard: {
+    backgroundColor: '#8B0000',
+    borderColor: '#FF0000',
+    shadowColor: '#FF0000',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.8,
+    shadowRadius: 8,
+    elevation: 10,
+  },
+  finalCard: {
+    width: 45,
+    height: 65,
+    borderWidth: 3,
+  },
+  cardEmoji: {
+    fontSize: 20,
+    textShadowColor: '#000',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 2,
+  },
+  cardBack: {
+    fontSize: 18,
+    color: '#999',
+    fontFamily: SIZES.bold,
+  },
+  finalMessageContainer: {
+    alignItems: 'center',
+    width: '100%',
+    padding: SIZES.paddingMedium,
+    backgroundColor: 'rgba(139,0,0,0.2)',
+    borderRadius: SIZES.cardRadius,
+    borderWidth: 1,
+    borderColor: '#8B0000',
+  },
+  finalMessageTitle: {
+    fontSize: SIZES.h3,
+    fontFamily: SIZES.bold,
+    color: '#FF4500',
     textAlign: 'center',
     marginBottom: SIZES.marginSmall,
     textShadowColor: '#000',
-    textShadowOffset: { width: 0, height: 2 },
-    textShadowRadius: 4,
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 3,
   },
-  revealedTaskText: {
-    fontSize: SIZES.body * 1.1,
-    fontFamily: SIZES.bold,
-    color: '#FFDDDD',
-    textAlign: 'center',
+  finalMessageText: {
+    fontSize: SIZES.body,
     lineHeight: SIZES.body * 1.6,
+    textAlign: 'center',
+    color: '#DC143C',
+    marginBottom: SIZES.marginMedium,
+    fontFamily: SIZES.regular,
+  },
+  fearText: {
+    fontSize: SIZES.caption,
+    color: '#8B0000',
+    textAlign: 'center',
+    fontStyle: 'italic',
+    opacity: 0.8,
   },
 
   /* Bottom buttons */

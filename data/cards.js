@@ -43,17 +43,28 @@ export const cardData = {
     // Daha fazla eklenebilir
   ],
 
-  // Siyah Kartlar (Oyun Sonu Cezaları)
+  // Siyah Kartlar (Oyun Sonu Cezaları) - ULTRA KORKUNÇ VERSİYON
   siyah: [
-    "Oyundaki tüm oyuncuların komik bir özelliğini taklit et.",
-    "Bir sonraki oyuna kadar telefonunu sadece acil durumlar için kullanabilirsin.",
-    "Herkesin önünde 30 saniye boyunca en sevdiğin şarkıyla dans et.",
-    "Sosyal medyada komik (ama uygun) bir paylaşım yap (herkesin onayıyla).",
-    "Kaybeden olarak kazanan oyuncuya küçük bir iyilik yap (örn: içecek getirmek).",
-    "Bir tekerlemeyi hızlıca 3 kez hatasız söylemeye çalış.",
-    "Gruptaki herkes için kısa ve komik bir şiir uydur.",
-    "Bir sonraki oyunun ilk 3 turunda her kararından önce zar atıyormuş gibi yap."
-    // Daha fazla eklenebilir
+    "Gece yarısı şehir mezarlığını tek başına dolaş ve selfie çek.",
+    "Bir hafta boyunca her gün aynı korkutucu rüyayı görene kadar uyumaya çalış.",
+    "En yakın terk edilmiş binaya gir ve 10 dakika bekle.",
+    "Gece 3'te aynaya bakıp 'Bloody Mary' de ve ne olacağını gör.",
+    "Karanlıkta tek başına korku filmlerinin en korkutucu sahnelerini izle.",
+    "Telefonunu kapatıp gece boyunca tamamen karanlık bir odada kal.",
+    "Hiç tanımadığın birine rastgele korku hikayesi anlat.",
+    "Bir hafta boyunca her gece farklı bir mezarlık fotoğrafı profil resminde kullan.",
+    "Evinin en karanlık köşesinde saatlerce hareketsiz otur.",
+    "Gece yarısı tek başına çıkıp kimsenin olmadığı bir yerde 'Yardım edin!' diye bağır.",
+    "En büyük korkuna yüzleş ve onu yenmeden geri dönme.",
+    "Bir sonraki haftayı her gece farklı bir kabus görmüş gibi davranarak geçir.",
+    "Arkadaşlarına korkunç gerçek hikayeleri anlat ta ki korkup kaçana kadar.",
+    "Evinin tüm ışıklarını kapat ve mum ışığında hayaletlerle konuşmaya çalış.",
+    "Bir hafta boyunca her gün ölümle ilgili bir şey araştır ve not al.",
+    "Gece yarısı terk edilmiş bir yerde 'Ben buradayım' diye bağır ve yanıt bekle.",
+    "Karanlık bir odada aynaya bakıp en derin korkularını yüksek sesle itiraf et.",
+    "Bir sonraki oyuna kadar sürekli arkana bakmaya devam et, sanki takip ediliyormuş gibi.",
+    "Her gece yatağın altına bak ve orada bir şey olduğunu hayal et.",
+    "Korku filmlerinin kötü karakterleri gibi giyinip sokaklarda dolaş."
   ]
 };
 

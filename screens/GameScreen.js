@@ -623,7 +623,7 @@ const GameScreen = ({ navigation }) => {
               type="success"
             />
             <ActionButton
-              title="Başkası Yapsın..."
+              title="Başkası Yapsın (+10)"
               onPress={actions.delegateTaskStart}
               disabled={!canDelegate}
               type={canDelegate ? 'warning' : 'secondary'}
