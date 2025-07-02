@@ -721,6 +721,9 @@ const GameScreen = ({ navigation }) => {
                   faceDownContextType={cardDisplayData.faceDownContextType}
                   style={[{ width: layoutSizes.responsiveCardWidth, height: layoutSizes.responsiveCardHeight }, styles.enhancedCard]}
                 />
+                {cardDisplayData.type === 'kırmızı' && cardDisplayData.isVisible && (
+                  <Text style={styles.redCardMessage}>Diğer oyuncular da duysun!</Text>
+                )}
               </View>
             )}
             {visibilityFlags.showVotingArea && renderVotingUI()}
@@ -1166,6 +1169,17 @@ const styles = StyleSheet.create({
     color: COLORS.textSecondary,
     fontFamily: SIZES.regular,
     textAlign: 'center',
+  },
+  redCardMessage: {
+    fontSize: SIZES.caption,
+    color: COLORS.accentLight,
+    textAlign: 'center',
+    marginTop: SIZES.base,
+    fontFamily: SIZES.regular,
+    fontStyle: 'italic',
+    textShadowColor: 'rgba(0,0,0,0.5)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 2,
   },
 });
 
