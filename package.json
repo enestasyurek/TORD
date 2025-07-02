@@ -1,0 +1,52 @@
+{
+  "name": "kartoyunu",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "expo start --dev-client",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
+    "web": "expo start --web"
+  },
+  "dependencies": {
+    "@expo/config-plugins": "~10.0.0",
+    "@expo/metro-runtime": "~5.0.4",
+    "@react-navigation/native": "^6.1.7",
+    "@react-navigation/stack": "^6.3.17",
+    "expo": "~53.0.0",
+    "expo-av": "~15.1.7",
+    "expo-blur": "~14.1.5",
+    "expo-constants": "~17.1.6",
+    "expo-dev-client": "~5.2.3",
+    "expo-font": "~13.3.2",
+    "expo-haptics": "~14.1.4",
+    "expo-linear-gradient": "~14.1.5",
+    "expo-splash-screen": "~0.30.9",
+    "expo-status-bar": "~2.2.3",
+    "moti": "^0.30.0",
+    "react": "19.0.0",
+    "react-dom": "19.0.0",
+    "react-native": "0.79.5",
+    "react-native-confetti-cannon": "^1.5.2",
+    "react-native-gesture-handler": "~2.24.0",
+    "react-native-reanimated": "~3.17.4",
+    "react-native-safe-area-context": "5.4.0",
+    "react-native-screens": "~4.11.1",
+    "react-native-web": "^0.20.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.20.0",
+    "babel-preset-expo": "~13.0.0",
+    "expo-module-scripts": "^3.5.1"
+  },
+  "private": true,
+  "expo": {
+    "doctor": {
+      "reactNativeDirectoryCheck": {
+        "exclude": [
+          "react-native-confetti-cannon"
+        ]
+      }
+    }
+  }
+}

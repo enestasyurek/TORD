@@ -1,0 +1,11 @@
+/node_modules
+/android
+/ios
+/build
+/dist
+/coverage
+/logs
+/temp
+/cache
+/backup
+
