@@ -35,6 +35,17 @@ const getNextPlayerIndex = (currentIndex, playerCount) => {
     return (currentIndex + 1) % playerCount;
 };
 
+// Helper: Format points message (pure)
+const formatPointsMessage = (points) => {
+    if (points > 0) {
+        return `+${points} Puan kazandı`;
+    } else if (points < 0) {
+        return `${Math.abs(points)} Puan kaybetti`;
+    } else {
+        return `Puan değişmedi`;
+    }
+};
+
 
 // --- Reducer Function ---
 export const gameReducer = (state, action) => {
@@ -243,7 +254,7 @@ export const gameReducer = (state, action) => {
                     currentRedCard: null, // Görev bitti
                     selectedPlayerForTask: null, // Delegasyon bitti
                     message: showNewCard ? `${playerName}, yeni gizli Mavi Kartın:\n(Aklında tut ve kapat)` : `${playerName} yeni Mavi Kart çekmeye çalıştı ama deste boş! Sıra geçiyor...`,
-                    lastActionMessage: `${playerName} +${points} Puan kazandı ve yeni Mavi Kart çekti!`,
+                    lastActionMessage: `${playerName} ${formatPointsMessage(points)} ve yeni Mavi Kart çekti!`,
                     // Kart yoksa sıra geçişi:
                     currentPlayerIndex: showNewCard ? state.currentPlayerIndex : getNextPlayerIndex(state.currentPlayerIndex, finalPlayers.length),
                     votingInfo: null,
@@ -259,7 +270,7 @@ export const gameReducer = (state, action) => {
                     gamePhase: 'playing', // Sıra geçişi
                     currentPlayerIndex: nextPlayerIndex,
                     message: `${nextPlayer.name}, sıra sende! Kırmızı kart çek.`,
-                    lastActionMessage: `${playerName} +${points} Puan kazandı!`
+                    lastActionMessage: `${playerName} ${formatPointsMessage(points)}!`
                 };
             }
         }

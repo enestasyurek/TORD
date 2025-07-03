@@ -233,6 +233,22 @@ export const GameProvider = ({ children }) => {
          } catch (e) { logError('iWillDoIt', e); }
     }, [gameState, handleTaskCompletion, unlockAchievement, triggerFeedback, logError]); // nextTurn bağımlılığı kaldırıldı
 
+    // Karar: "Yapamadım"
+    const iCouldntDoIt = useCallback(() => {
+        try {
+            const currentPlayer = gameState.players[gameState.currentPlayerIndex];
+            const task = gameState.currentRedCard;
+            if (!currentPlayer || !task || !task.text) { 
+                triggerFeedback(Haptics.NotificationFeedbackType.Error, 'error'); 
+                return; 
+            }
+            // handleTaskCompletion with negative points
+            handleTaskCompletion(currentPlayer.id, -5, null, null, false, null, false);
+        } catch (e) { 
+            logError('iCouldntDoIt', e); 
+        }
+    }, [gameState, handleTaskCompletion, triggerFeedback, logError]);
+
      // Karar: "O Yapsın" Başlangıç
     const delegateTaskStart = useCallback(() => { 
         try { 
@@ -418,7 +434,7 @@ export const GameProvider = ({ children }) => {
    // --- Context Değeri ---
    const actions = useMemo(() => ({
        setupGame, showInitialBlueCard, hideInitialBlueCardAndProceed, drawRedCardForTurn,
-       iWillDoIt, delegateTaskStart, selectPlayerForTask, cancelPlayerSelection, // Kararlar
+       iWillDoIt, iCouldntDoIt, delegateTaskStart, selectPlayerForTask, cancelPlayerSelection, // Kararlar
        delegatorDidBlueTask, selectedPlayerDidRedTask, confirmCloseNewBlueCard, // Delegasyon
        castVote, // Oylama
        assignAndFinishBlackCard, // Oyun sonu
@@ -426,7 +442,7 @@ export const GameProvider = ({ children }) => {
        // handleTaskCompletion ve processVotingResults gibi iç mantık fonksiyonları dışarıya açılmamalı
    }), [ // Tüm public aksiyonları listele
        setupGame, showInitialBlueCard, hideInitialBlueCardAndProceed, drawRedCardForTurn,
-       iWillDoIt, delegateTaskStart, selectPlayerForTask, cancelPlayerSelection,
+       iWillDoIt, iCouldntDoIt, delegateTaskStart, selectPlayerForTask, cancelPlayerSelection,
        delegatorDidBlueTask, selectedPlayerDidRedTask, confirmCloseNewBlueCard,
        castVote, assignAndFinishBlackCard,
        restartGame, restartWithSamePlayers

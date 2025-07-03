@@ -630,6 +630,13 @@ const GameScreen = ({ navigation }) => {
               iconLeft="people-outline"
               style={styles.spacerTop}
             />
+            <ActionButton
+              title="Yapamadım (-5)"
+              onPress={actions.iCouldntDoIt}
+              iconLeft="close-circle-outline"
+              type="danger"
+              style={styles.spacerTop}
+            />
             {!canDelegate && (
               <Text style={styles.warningText}>Görev devredilecek uygun oyuncu yok.</Text>
             )}
